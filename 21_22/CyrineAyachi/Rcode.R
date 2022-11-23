@@ -1,5 +1,11 @@
-library(readxl)
-base=read_excel("C:/Users/DELL/Desktop/base de données.xlsx",col_types = c("text", "date", "date","numeric", "numeric", "text", "date", "numeric", "numeric", "date", "text","date", "numeric", "numeric", "numeric","text"))    
+
+###########################################
+#        loading the data
+###########################################
+
+data=read.csv("https://raw.githubusercontent.com/Hamrita/Encadrements/main/21_22/CyrineAyachi/Data/data.csv",
+              h=T,sep=";",row.names = NULL)
+
 data=base
 str(data)
 data$SIN.2021<-as.factor(data$SIN.2021)
@@ -11,12 +17,23 @@ anyNA(data)
 #######################################
 dats=data[,-c(11,12)]
 
-
 #knn 
 library(caTools)
-sample <- sample(c(TRUE, FALSE), nrow(dats), replace=TRUE, prob=c(0.7,0.3))
-train  <- dats[sample, ]
-test   <- dats[!sample, ]
+library(caret)
+
+##############################
+#   partition data   
+#####
+indxTrain <- createDataPartition(y = dats$SINISTRALITE,p = 0.7,list = FALSE)
+training <- dats[indxTrain,]
+testing <- dats[-indxTrain,]
+#######################################
+#   normalization 
+###############################
+
+trainX <- training[,names(training) != "SINISTRABILITE"]
+dataCentered <- preProcess(x = trainX,method = c("center", "scale"))
+
 nor <-function(x) { (x -min(x))/(max(x)-min(x))   }
 iris_norm <- as.data.frame(apply(dats[,-c(1,5)],2, 'nor'))
 summary(iris_norm)
